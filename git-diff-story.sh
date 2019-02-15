@@ -2,11 +2,16 @@
 
 # default options
 NAME_ONLY=false
+EXTENSION=*
 
 for i in "$@"; do
     case $i in
         --name-only)
         NAME_ONLY=true
+        shift
+        ;;
+        -e=*|--extension=*)
+        EXTENSION="${i#*=}"
         shift
         ;;
         *)
@@ -40,12 +45,14 @@ MODIFIED_FILES_SCRIPT="./git-files-story.sh"
 MODIFIED_FILES=$($MODIFIED_FILES_SCRIPT $CARD_ID)
 while IFS='' read -ra ADDR; do
     for file in "${ADDR[@]}"; do
-        DIFF_FILE="$DIFF_CMD -- $file"
-        if [[ ! -z $($DIFF_FILE) ]]; then
-            if $NAME_ONLY; then
-                echo $file
-            else
-                $DIFF_FILE
+        if [[ $file == *$EXTENSION ]]; then
+            DIFF_FILE="$DIFF_CMD -- $file"
+            if [[ ! -z $($DIFF_FILE) ]]; then
+                if $NAME_ONLY; then
+                    echo $file
+                else
+                    $DIFF_FILE
+                fi
             fi
         fi
     done
