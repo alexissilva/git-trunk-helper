@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# messages
+NO_STORY_ID="No story id supplied"
+NO_STORY_COMMITS="There are not any commits for this story"
+
 # default options
 NAME_ONLY=false
 EXTENSION=*
@@ -21,7 +25,7 @@ for i in "$@"; do
 done
 
 if [ -z $CARD_ID ]; then
-    echo "No card id supplied"
+    echo $NO_STORY_ID
     exit 1
 fi
 
@@ -33,6 +37,11 @@ read -r LAST_COMMIT <<< "$COMMITS"
 
 ALL_COMMITS=$(git log --pretty=%h --reverse)
 read -r INITIAL_REPO_COMMIT <<< "$ALL_COMMITS"
+if [ -z $FIRST_COMMIT ]; then
+    echo $NO_STORY_COMMITS
+    exit 1
+fi
+
 if [ $FIRST_COMMIT = $INITIAL_REPO_COMMIT ]; then
     START_COMMIT=$FIRST_COMMIT
 else
