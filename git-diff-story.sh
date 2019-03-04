@@ -6,7 +6,7 @@ NO_STORY_COMMITS="There are not any commits for this story"
 
 # default options
 NAME_ONLY=false
-EXTENSION=*
+PATTERN=.*
 
 for i in "$@"; do
     case $i in
@@ -14,8 +14,8 @@ for i in "$@"; do
         NAME_ONLY=true
         shift
         ;;
-        -e=*|--extension=*)
-        EXTENSION="${i#*=}"
+        -p=*|--pattern=*)
+        PATTERN="${i#*=}"
         shift
         ;;
         *)
@@ -54,7 +54,7 @@ MODIFIED_FILES_SCRIPT="./git-files-story.sh"
 MODIFIED_FILES=$($MODIFIED_FILES_SCRIPT $STORY_ID)
 while IFS='' read -ra ADDR; do
     for file in "${ADDR[@]}"; do
-        if [[ $file == *$EXTENSION ]]; then
+        if [[ $file =~ $PATTERN ]]; then
             DIFF_FILE="$DIFF_CMD -- $file"
             if [[ ! -z $($DIFF_FILE) ]]; then
                 if $NAME_ONLY; then

@@ -12,8 +12,9 @@ To see the changes made in the story `STORY_ID`
 To see only the names of modified files
 > ./git-diff-story.sh STORY_ID --name-only
 
-To filter per extension file use option `--extension` or `-e`
-> ./git-diff-story.sh STORY_ID -e=.test.js
+To filter files, you can use option `--pattern` or `-p`
+> ./git-diff-story.sh STORY_ID -p=test.js
+./git-diff-story.sh STORY_ID -p=/controllers
 
 ...
 
