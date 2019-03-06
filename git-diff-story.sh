@@ -10,7 +10,7 @@ PATTERN=.*
 
 for i in "$@"; do
     case $i in
-        --name-only)
+        -n|--name-only)
         NAME_ONLY=true
         shift
         ;;

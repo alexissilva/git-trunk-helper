@@ -9,7 +9,7 @@ To see the changes made in the story `STORY_ID`
 > ./git-diff-story.sh STORY_ID
 
 
-To see only the names of modified files
+To see only modified files names, use `--name-only` or `-n`
 > ./git-diff-story.sh STORY_ID --name-only
 
 To filter files, you can use option `--pattern` or `-p`
