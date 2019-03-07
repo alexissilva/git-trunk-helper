@@ -6,12 +6,23 @@ NO_STORY_COMMITS="There are not any commits for this story"
 
 # default options
 NAME_ONLY=false
+STAT=false
 PATTERN=.*
+ONE_BY_ONE=true
 
+# sets options
 for i in "$@"; do
     case $i in
         -n|--name-only)
         NAME_ONLY=true
+        shift
+        ;;
+        -s|--stat)
+        STAT=true
+        shift
+        ;;
+        -a|--all)
+        ONE_BY_ONE=false
         shift
         ;;
         -p=*|--pattern=*)
@@ -29,6 +40,11 @@ if [ -z $STORY_ID ]; then
     exit 1
 fi
 
+if $STAT || $NAME_ONLY; then
+    ONE_BY_ONE=false
+fi
+
+# creates diff command
 COMMITS_CMD="git log --pretty=%h --grep=$STORY_ID"
 COMMITS=$($COMMITS_CMD)
 REVERSE_COMMITS=$($COMMITS_CMD --reverse)
@@ -48,21 +64,42 @@ else
     START_COMMIT=$FIRST_COMMIT~1
 fi
 
-DIFF_CMD="git diff $START_COMMIT $LAST_COMMIT"
+DIFF_BASIC_CMD="git diff $START_COMMIT $LAST_COMMIT"
+DIFF_CMD=$DIFF_BASIC_CMD
+if $STAT; then
+    DIFF_CMD="$DIFF_CMD --stat"
+fi
+if $NAME_ONLY; then
+    DIFF_CMD="$DIFF_CMD --name-only"
+fi
 
+# filters files
 MODIFIED_FILES_SCRIPT="./git-files-story.sh"
 MODIFIED_FILES=$($MODIFIED_FILES_SCRIPT $STORY_ID)
-while IFS='' read -ra ADDR; do
-    for file in "${ADDR[@]}"; do
+FILTERED_FILES=()
+while IFS='' read -ra FILES; do
+    for file in "${FILES[@]}"; do
         if [[ $file =~ $PATTERN ]]; then
-            DIFF_FILE="$DIFF_CMD -- $file"
+            DIFF_FILE="$DIFF_BASIC_CMD -- $file"
             if [[ ! -z $($DIFF_FILE) ]]; then
-                if $NAME_ONLY; then
-                    echo $file
-                else
-                    $DIFF_FILE
-                fi
+                FILTERED_FILES+=($file)
             fi
         fi
     done
 done <<< "$MODIFIED_FILES"
+
+
+# execute command
+if $ONE_BY_ONE; then
+    for file in "${FILTERED_FILES[@]}"; do
+        DIFF_CMD_BY_FILE="$DIFF_CMD -- $file"
+        $DIFF_CMD_BY_FILE
+    done
+else
+    FILES_STRING=""
+    for file in "${FILTERED_FILES[@]}"; do
+        FILES_STRING+=" $file"
+    done
+    DIFF_CMD_ALL="$DIFF_CMD -- $FILES_STRING"
+    $DIFF_CMD_ALL
+fi
