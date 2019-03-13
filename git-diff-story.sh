@@ -3,12 +3,14 @@
 # messages
 NO_STORY_ID="No story id supplied"
 NO_STORY_COMMITS="There are not any commits for this story"
+NO_VALID_START="The start commit does not belong to the story"
 
 # default options
 NAME_ONLY=false
 STAT=false
 PATTERN=.*
 ONE_BY_ONE=true
+CUSTOM_START=
 
 # sets options
 for i in "$@"; do
@@ -29,6 +31,10 @@ for i in "$@"; do
         PATTERN="${i#*=}"
         shift
         ;;
+        --start=*)
+        CUSTOM_START="${i#*=}"
+        shift
+        ;;
         *)
         STORY_ID=$1
         ;;
@@ -45,7 +51,12 @@ if $STAT || $NAME_ONLY; then
 fi
 
 # creates diff command
-COMMITS_CMD="git log --pretty=%h --grep=$STORY_ID"
+if [ ! -z $CUSTOM_START ]; then
+    DATE_CUSTOM_START=$(git log --pretty=%aI -n 1 $CUSTOM_START)
+    SINCE_CMD="--since=\"$DATE_CUSTOM_START\""
+fi
+
+COMMITS_CMD="git log --pretty=%h --grep=$STORY_ID $SINCE_CMD"
 COMMITS=$($COMMITS_CMD)
 REVERSE_COMMITS=$($COMMITS_CMD --reverse)
 read -r FIRST_COMMIT <<< "$REVERSE_COMMITS"
@@ -58,7 +69,7 @@ if [ -z $FIRST_COMMIT ]; then
     exit 1
 fi
 
-if [ $FIRST_COMMIT = $INITIAL_REPO_COMMIT ]; then
+if [ ! -z $CUSTOM_START ] || [ $FIRST_COMMIT = $INITIAL_REPO_COMMIT ]; then
     START_COMMIT=$FIRST_COMMIT
 else
     START_COMMIT=$FIRST_COMMIT~1
