@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# config
+PREFIX_STORY_ID="#"
+STORY_ID_END_PATTERN="\([^0-9]\|$\)"
+
 # messages
 NO_STORY_ID="No story id supplied"
 NO_STORY_COMMITS="There are not any commits for this story"
@@ -63,7 +67,8 @@ if [ ! -z $CUSTOM_START ]; then
     SINCE_CMD="--since=\"$DATE_AFTER_START\""
 fi
 
-COMMITS_CMD="git log --pretty=%h --grep=$STORY_ID $SINCE_CMD"
+STORY_ID_PATTERN="$PREFIX_STORY_ID$STORY_ID$STORY_ID_END_PATTERN"
+COMMITS_CMD="git log --pretty=%h --grep=$STORY_ID_PATTERN $SINCE_CMD"
 COMMITS=$($COMMITS_CMD)
 REVERSE_COMMITS=$($COMMITS_CMD --reverse)
 read -r FIRST_COMMIT <<< "$REVERSE_COMMITS"
