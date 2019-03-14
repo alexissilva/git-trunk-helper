@@ -3,6 +3,12 @@
 # messages
 NO_STORY_ID="No story id supplied"
 NO_STORY_COMMITS="There are not any commits for this story"
+NO_GIT_REPOSITORY="Not a git repository"
+
+if ! git rev-parse --is-inside-work-tree -q > /dev/null 2>&1; then
+    echo $NO_GIT_REPOSITORY
+    exit 1
+fi
 
 # default options
 NAME_ONLY=false
@@ -89,7 +95,7 @@ fi
 
 
 # filters files
-MODIFIED_FILES_SCRIPT="./git-files-story"
+MODIFIED_FILES_SCRIPT="git files-story"
 MODIFIED_FILES=$($MODIFIED_FILES_SCRIPT $STORY_ID)
 FILTERED_FILES=()
 while IFS='' read -ra FILES; do
