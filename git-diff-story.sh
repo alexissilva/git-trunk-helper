@@ -3,7 +3,6 @@
 # messages
 NO_STORY_ID="No story id supplied"
 NO_STORY_COMMITS="There are not any commits for this story"
-NO_VALID_START="The start commit does not belong to the story"
 
 # default options
 NAME_ONLY=false
@@ -50,10 +49,12 @@ if $STAT || $NAME_ONLY; then
     ONE_BY_ONE=false
 fi
 
-# creates diff command
+
+# finds start and last commit
 if [ ! -z $CUSTOM_START ]; then
-    DATE_CUSTOM_START=$(git log --pretty=%aI -n 1 $CUSTOM_START)
-    SINCE_CMD="--since=\"$DATE_CUSTOM_START\""
+    DATE_CUSTOM_START=$(git log --pretty=%at -n 1 $CUSTOM_START)
+    DATE_AFTER_START=$((DATE_CUSTOM_START+1))
+    SINCE_CMD="--since=\"$DATE_AFTER_START\""
 fi
 
 COMMITS_CMD="git log --pretty=%h --grep=$STORY_ID $SINCE_CMD"
@@ -62,19 +63,21 @@ REVERSE_COMMITS=$($COMMITS_CMD --reverse)
 read -r FIRST_COMMIT <<< "$REVERSE_COMMITS"
 read -r LAST_COMMIT <<< "$COMMITS"
 
-ALL_COMMITS=$(git log --pretty=%h --reverse)
-read -r INITIAL_REPO_COMMIT <<< "$ALL_COMMITS"
 if [ -z $FIRST_COMMIT ]; then
     echo $NO_STORY_COMMITS
     exit 1
 fi
 
-if [ ! -z $CUSTOM_START ] || [ $FIRST_COMMIT = $INITIAL_REPO_COMMIT ]; then
+ALL_COMMITS=$(git log --pretty=%h --reverse)
+read -r INITIAL_REPO_COMMIT <<< "$ALL_COMMITS"
+if [ $FIRST_COMMIT = $INITIAL_REPO_COMMIT ]; then
     START_COMMIT=$FIRST_COMMIT
 else
     START_COMMIT=$FIRST_COMMIT~1
 fi
 
+
+# creates diff command
 DIFF_BASIC_CMD="git diff $START_COMMIT $LAST_COMMIT"
 DIFF_CMD=$DIFF_BASIC_CMD
 if $STAT; then
@@ -83,6 +86,7 @@ fi
 if $NAME_ONLY; then
     DIFF_CMD="$DIFF_CMD --name-only"
 fi
+
 
 # filters files
 MODIFIED_FILES_SCRIPT="./git-files-story.sh"
