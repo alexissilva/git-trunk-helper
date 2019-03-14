@@ -89,7 +89,7 @@ fi
 
 
 # filters files
-MODIFIED_FILES_SCRIPT="./git-files-story.sh"
+MODIFIED_FILES_SCRIPT="./git-files-story"
 MODIFIED_FILES=$($MODIFIED_FILES_SCRIPT $STORY_ID)
 FILTERED_FILES=()
 while IFS='' read -ra FILES; do
