@@ -1,4 +1,5 @@
 #!/bin/bash
+source config
 
 # messages
 NO_STORY_ID="No story id supplied"
@@ -18,5 +19,6 @@ if [ -z $STORY_ID ]; then
 fi
 
 # executs command
-LOG_CMD="git log --grep=$STORY_ID"
+STORY_ID_PATTERN="$PREFIX_STORY_ID$STORY_ID$STORY_ID_END_PATTERN"
+LOG_CMD="git log --grep=$STORY_ID_PATTERN"
 $LOG_CMD

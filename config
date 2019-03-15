@@ -1,0 +1,3 @@
+#!/bin/bash
+PREFIX_STORY_ID="#"
+STORY_ID_END_PATTERN="\([^0-9]\|$\)"

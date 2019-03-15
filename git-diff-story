@@ -1,8 +1,5 @@
 #!/bin/bash
-
-# config
-PREFIX_STORY_ID="#"
-STORY_ID_END_PATTERN="\([^0-9]\|$\)"
+source config
 
 # messages
 NO_STORY_ID="No story id supplied"

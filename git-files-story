@@ -1,13 +1,25 @@
 #!/bin/bash
-if [ $# -eq 0 ]; then
-    echo "No arguments supplied"
+source config
+
+# sets options
+for i in "$@"; do
+    case $i in
+        *)
+        STORY_ID=$1
+        ;;
+    esac
+done
+
+if [ -z $STORY_ID ]; then
+    echo $NO_STORY_ID
     exit 1
 fi
 
-CARD_ID=$1
+# gets files
+STORY_ID_PATTERN="$PREFIX_STORY_ID$STORY_ID$STORY_ID_END_PATTERN"
+FILES=$(git log --pretty=%n --name-only --grep=$STORY_ID_PATTERN)
 
-FILES=$(git log --pretty=%n --name-only --grep=$CARD_ID)
-
+# sorts and prints files 
 while IFS='' read -ra ADDR; do
     for file in "${ADDR[@]}"; do
         FILE_ARRAY+=($file)
