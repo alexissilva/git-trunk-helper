@@ -17,6 +17,7 @@ STAT=false
 PATTERN=.*
 ONE_BY_ONE=true
 CUSTOM_START=
+SKIP_TESTS=false
 
 # sets options
 for i in "$@"; do
@@ -31,6 +32,10 @@ for i in "$@"; do
         ;;
         -a|--all)
         ONE_BY_ONE=false
+        shift
+        ;;
+        -st|--skip-tests)
+        SKIP_TESTS=true
         shift
         ;;
         -p=*|--pattern=*)
@@ -102,7 +107,7 @@ MODIFIED_FILES=$($MODIFIED_FILES_SCRIPT $STORY_ID)
 FILTERED_FILES=()
 while IFS='' read -ra FILES; do
     for file in "${FILES[@]}"; do
-        if [[ $file =~ $PATTERN ]]; then
+        if [[ $file =~ $PATTERN ]] && (! $SKIP_TESTS  || ! [[ $file =~ $TEST_PATTERN ]]); then
             DIFF_FILE="$DIFF_BASIC_CMD -- $file"
             if [[ ! -z $($DIFF_FILE) ]]; then
                 FILTERED_FILES+=($file)
