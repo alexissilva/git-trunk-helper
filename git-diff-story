@@ -5,6 +5,7 @@ source config
 NO_STORY_ID="No story id supplied"
 NO_STORY_COMMITS="There are not any commits for this story"
 NO_GIT_REPOSITORY="Not a git repository"
+NO_FILTERED_FILES="There are not files which matches with the filters"
 
 if ! git rev-parse --is-inside-work-tree -q > /dev/null 2>&1; then
     echo $NO_GIT_REPOSITORY
@@ -116,6 +117,10 @@ while IFS='' read -ra FILES; do
     done
 done <<< "$MODIFIED_FILES"
 
+if [ -z $FILTERED_FILES ]; then
+    echo $NO_FILTERED_FILES
+    exit 1
+fi
 
 # execute command
 if $ONE_BY_ONE; then
