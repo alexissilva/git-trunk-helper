@@ -34,3 +34,11 @@ Filters files using a pattern.
 `--start=<commit>`
 
 Shows changes since a specific commit
+
+`--test=skip`, `-t=skip`, `-t=s` 
+
+Skip test files
+
+`--test=only`, `-t=only`, `-t=o`
+
+Shows only test files
