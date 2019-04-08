@@ -5,7 +5,7 @@ source config
 NO_STORY_ID="No story id supplied"
 NO_STORY_COMMITS="There are not any commits for this story"
 NO_GIT_REPOSITORY="Not a git repository"
-NO_FILTERED_FILES="There are not files which matches with the filters"
+NO_FILTERED_FILES="None files match with the filters"
 
 if ! git rev-parse --is-inside-work-tree -q > /dev/null 2>&1; then
     echo $NO_GIT_REPOSITORY
@@ -18,7 +18,9 @@ STAT=false
 PATTERN=.*
 ONE_BY_ONE=true
 CUSTOM_START=
+TEST_OPTION=
 SKIP_TESTS=false
+ONLY_TESTS=false
 
 # sets options
 for i in "$@"; do
@@ -35,8 +37,8 @@ for i in "$@"; do
         ONE_BY_ONE=false
         shift
         ;;
-        -st|--skip-tests)
-        SKIP_TESTS=true
+        -t=*|--tests=*)
+        TEST_OPTION="${i#*=}"
         shift
         ;;
         -p=*|--pattern=*)
@@ -61,6 +63,17 @@ fi
 if $STAT || $NAME_ONLY; then
     ONE_BY_ONE=false
 fi
+
+case $TEST_OPTION in
+    s|skip)
+    SKIP_TESTS=true
+    shift
+    ;;
+    o|only)
+    ONLY_TESTS=true
+    shift
+    ;;
+esac
 
 
 # finds start and last commit
@@ -108,7 +121,7 @@ MODIFIED_FILES=$($MODIFIED_FILES_SCRIPT $STORY_ID)
 FILTERED_FILES=()
 while IFS='' read -ra FILES; do
     for file in "${FILES[@]}"; do
-        if [[ $file =~ $PATTERN ]] && (! $SKIP_TESTS  || ! [[ $file =~ $TEST_PATTERN ]]); then
+        if [[ $file =~ $PATTERN ]] && (! $SKIP_TESTS || ! [[ $file =~ $TEST_PATTERN ]]) && (! $ONLY_TESTS || [[ $file =~ $TEST_PATTERN ]]); then
             DIFF_FILE="$DIFF_BASIC_CMD -- $file"
             if [[ ! -z $($DIFF_FILE) ]]; then
                 FILTERED_FILES+=($file)
