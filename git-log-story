@@ -4,9 +4,21 @@ source config
 # messages
 NO_STORY_ID="No story id supplied"
 
+# default options
+NAME_ONLY=false
+ONELINE=false
+
 # sets options
 for i in "$@"; do
     case $i in
+        -n|--name-only)
+        NAME_ONLY=true
+        shift
+        ;;
+        -o|--oneline)
+        ONELINE=true
+        shift
+        ;;
         *)
         STORY_ID=$1
         ;;
@@ -21,4 +33,12 @@ fi
 # executs command
 STORY_ID_PATTERN="$PREFIX_STORY_ID$STORY_ID$STORY_ID_END_PATTERN"
 LOG_CMD="git log --grep=$STORY_ID_PATTERN"
+
+if $NAME_ONLY; then
+    LOG_CMD="$LOG_CMD --name-only"
+fi
+
+if $ONELINE; then
+    LOG_CMD="$LOG_CMD --oneline"
+fi
 $LOG_CMD
